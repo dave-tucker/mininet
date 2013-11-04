@@ -953,6 +953,9 @@ class OVSSwitch( Switch ):
         Switch.__init__( self, name, **params )
         self.failMode = failMode
         self.datapath = datapath
+        protocol_key = 'protocols'
+        if self.params and protocol_key in self.params:
+            self.opts += '%s=%s' % (protocol_key, self.params[protocol_key])
 
     @classmethod
     def setup( cls ):
@@ -1028,7 +1031,7 @@ class OVSSwitch( Switch ):
             self.cmd( 'ovs-vsctl set bridge', self,'datapath_type=netdev' )
         int( self.dpid, 16 ) # DPID must be a hex string
         self.cmd( 'ovs-vsctl -- set Bridge', self,
-                  'other_config:datapath-id=' + self.dpid )
+                  self.opts + ' other_config:datapath-id=' + self.dpid)
         self.cmd( 'ovs-vsctl set-fail-mode', self, self.failMode )
         for intf in self.intfList():
             if not intf.IP():
